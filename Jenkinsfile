@@ -42,6 +42,7 @@ pipeline {
 		//sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer.pfizer.com@amrvlp000006956 'dzdo chmod 775 /dt_pfizeraligndata/test/Scripts/CDW_CUST/*'"
 		//sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer.pfizer.com@amrvlp000006956 'dzdo chown -R infadmd2:etl /dt_pfizeraligndata/test/Scripts/CDW_CUST/*'" 
 		}
+	}
 	 stage ("Deploy to Unix"){
             when {
                  expression { params.Deploy_to_Unix == "Yes" }
@@ -59,4 +60,4 @@ pipeline {
 				
         }
     }
-}
+
