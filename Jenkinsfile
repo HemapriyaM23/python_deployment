@@ -8,7 +8,9 @@ pipeline {
 	apiEndpoint='https://amraelp00011055.pfizer.com:9443/AEWS/jil'
     }
     parameters {
-        choice choices: ['No', 'Yes'], description: 'Mention if You want to Deploy into Autosys Environment', name: 'Deploy_to_Autosys'     
+        choice choices: ['No', 'Yes'], description: 'Mention if You want to Deploy into Autosys Environment', name: 'Deploy_to_Autosys'
+	choice choices: ['No', 'Yes'], description: 'Mention if You want to Deploy into Unix Environment', name: 'Deploy_to_Unix'
+       
     }
     stages{
         
@@ -41,6 +43,18 @@ pipeline {
 		//sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer.pfizer.com@amrvlp000006956 'dzdo chmod 775 /dt_pfizeraligndata/test/Scripts/CDW_CUST/*'"
 		//sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer.pfizer.com@amrvlp000006956 'dzdo chown -R infadmd2:etl /dt_pfizeraligndata/test/Scripts/CDW_CUST/*'" 
 		}
+	 stage ("Deploy to Unix"){
+            when {
+                 expression { params.Deploy_to_Unix == "Yes" }
+            }
+                steps{
+                    script{
+        	  sh "scp -i /var/lib/jenkins/.ssh/id_rsa test1.py srvamr-sfaops@amer@10.191.123.96:/app/etl/palign/scripts/scripts_ui/python_scripts"
+		  sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer@10.191.123.96 'sudo chmod 775 /app/etl/palign/scripts/scripts_ui/python_scripts/*'"
+		
+		    }
+                }
+        }
             
 				
         }
