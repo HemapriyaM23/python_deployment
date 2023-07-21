@@ -19,8 +19,7 @@ pipeline {
                  expression { params.Deploy_to_Autosys == "Yes" }
             }
             steps{		
-		//prod server testing
-		{		
+		//prod server testing		
 		        sh 'chmod +x python_scripts/autosys_deploy.sh' 
 		        withCredentials([usernamePassword(credentialsId: 'sfaops', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
         		    script {
