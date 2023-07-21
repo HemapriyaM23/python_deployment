@@ -49,8 +49,9 @@ pipeline {
             }
                 steps{
                     script{
-        	  sh "scp -i /var/lib/jenkins/.ssh/id_rsa test1.py srvamr-sfaops@amer@10.191.123.96:/app/etl/palign/scripts/scripts_ui/python_scripts"
-		  sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer@10.191.123.96 'sudo chmod 775 /app/etl/palign/scripts/scripts_ui/python_scripts/*'"
+        	  sh "scp -i /var/lib/jenkins/.ssh/id_rsa test1.py srvamr-sfaops@amer@EUZ1PLDW08
+:/app/etl/repl/scripts"
+		  sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer@EUZ1PLDW08 'sudo chmod 775 /app/etl/repl/scripts/*'"
 		
 		    }
                 }
