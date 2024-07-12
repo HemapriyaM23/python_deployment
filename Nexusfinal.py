@@ -1,92 +1,32 @@
 ```yaml
-name: Nexus Deployment
+name: Deploy to Server
 
 on:
   push:
     branches:
-      - sit
+      - main  # Trigger the workflow on push to the main branch
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Configure AWS credentials
+    - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        role-to-assume: arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/YOUR_ROLE_NAME
-        aws-region: eu-west-1  # Ireland region
+        role-to-assume: arn:aws:iam::123456789012:role/YourOIDCRole
+        aws-region: us-west-2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-
-    - name: Install dependencies
+    - name: Execute Deployment Commands
       run: |
-        python -m venv venv
-        source venv/bin/activate
-        pip install -r requirements.txt
-
-    - name: Pull latest changes
-      run: |
-        git reset --hard
-        git pull origin sit
-
-    - name: Activate virtual environment
-      run: source files/virtual_envs/.NexusEnv/bin/activate
-
-    - name: Collect static files
-      run: |
-        cd /home/nginx/sit-nexus
-        python manage.py collectstatic --noinput
-
-    - name: Restart Gunicorn service
-      run: sudo systemctl restart gunicorn-sit_nexus.service
-
-    - name: Reload Nginx
-      run: sudo nginx -s reload
-
-    - name: Send SSM command
-      id: send_command
-      run: |
-        COMMAND_ID=$(aws ssm send-command \
-          --document-name "AWS-RunShellScript" \
-          --targets "Key=instanceids,Values=YOUR_EC2_INSTANCE_ID" \
-          --parameters 'commands=["cd /home/nginx/sit-nexus", "source files/virtual_envs/.NexusEnv/bin/activate", "python manage.py migrate", "python manage.py collectstatic --noinput", "sudo systemctl restart gunicorn-sit_nexus.service", "sudo nginx -s reload"]' \
-          --region eu-west-1 \
-          --query "Command.CommandId" \
-          --output text)
-        echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_ENV
-
-    - name: Wait for command to complete
-      run: |
-        sleep 10  # Adjust the sleep time as necessary
-
-    - name: Get command output
-      id: get_output
-      run: |
-        OUTPUT=$(aws ssm get-command-invocation \
-          --command-id ${{ env.COMMAND_ID }} \
-          --instance-id YOUR_EC2_INSTANCE_ID \
-          --region eu-west-1 \
-          --query "StandardOutputContent" \
-          --output text)
-        echo "$OUTPUT"
-        echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
-
-    - name: Check for errors
-      run: |
-        if [ -z "${{ env.OUTPUT }}" ]; then
-          echo "Error: No output received from SSM command"
-          exit 1
-        fi
+        instance_id="i-xxxxxxxxxxxxxxxxx"
+        aws ssm start-session --target $instance_id --document-name "AWS-StartNonInteractiveCommand" --parameters '{"commands":["cd /home/nginx/sit-nexus","git pull origin sit","stat -c %y .git/FETCH_HEAD","source files/virtual_envs/NexusEnv/bin/activate","chmod +x files/virtual_envs/NexusEnv/bin/activate","source files/virtual_envs/NexusEnv/bin/activate","python manage.py collectstatic","sudo systemctl restart gunicorn-sit_nexus.service","sudo systemctl status gunicorn-sit_nexus.service","sudo nginx -t","sudo nginx -s reload","sudo systemctl status nginx.service"]}' --region us-west-2
 
 ```
