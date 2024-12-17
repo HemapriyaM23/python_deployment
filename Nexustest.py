@@ -1,3 +1,42 @@
+Here’s the **Confluence-formatted guide** for signing up to a Terraform Cloud account:
+
+---
+
+## **Steps to Sign Up for a Terraform Cloud Account**
+
+### **1. Visit the Signup Page**
+- Go to [Terraform Cloud Signup Page](https://app.terraform.io/signup/account).
+
+### **2. Create an Account**
+- Fill in the following details:
+  - **Username**
+  - **Email Address**
+  - **Password**
+- Agree to the terms and conditions, then click on **"Create Account"**.
+
+### **3. Confirm Your Email**
+- Check your email inbox for a confirmation email from Terraform Cloud.
+- Click on the confirmation link to verify your email address.
+
+### **4. Create an Organization**
+- After verifying your email, you’ll be prompted to create an organization.
+- Provide:
+  - **Organization Name**: A unique name for your organization.
+  - **Organization Email**: You can use the same email as your account.
+- Click on **"Create Organization"**.
+
+### **5. Start Using Terraform Cloud**
+- Once your organization is set up, you can:
+  - Create workspaces.
+  - Manage infrastructure as code.
+
+---
+
+### **Notes**
+- Terraform Cloud is free for up to 5 users.
+- For additional features or team scaling, explore paid plans under the "Settings" tab.
+
+Sources
 To ensure that the output of the `aws ssm send-command` is captured and displayed in the GitHub Actions logs, you need to retrieve the command invocation details after sending the command. Here’s how to do it:
 
 ### Detailed Steps to Capture and Display SSM Command Output in GitHub Actions
