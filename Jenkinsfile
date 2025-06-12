@@ -9,6 +9,7 @@ pipeline {
         snowflake_COMETL_CONTROL__db_url = "${getProperty("${env.BRANCH_NAME}_pfzalgn_snowflake_COMETL_CONTROL_db_url_apac_da")}"
         
         snowflake_credid = "${env.BRANCH_NAME}_pfzalgn_snowflake_credid_apac_da"
+        private_key_password = credentials('prv_key_pwd')
         
     }
     parameters {
@@ -31,7 +32,7 @@ pipeline {
                         
                        def liquibaseCommand = """
                         liquibase \
-                              --url="jdbc:snowflake://emeadev01.eu-west-1.privatelink.snowflakecomputing.com/?user=CMMFRCRO@pfizer.com&privateKeyFile=/home/srvamr-sfaops/test_private_key/test.p8&privateKeyFilePwd=${prv_key_pwd}&warehouse=PFE_COMMON_WH_XS_01&db=COMETL_SFDC_X_REGION_DEV_DB&schema=COMETL_SFDC_PUBLISH" \
+                              --url="jdbc:snowflake://emeadev01.eu-west-1.privatelink.snowflakecomputing.com/?user=CMMFRCRO@pfizer.com&privateKeyFile=/home/srvamr-sfaops/test_private_key/test.p8&privateKeyFilePwd=${private_key_password}&warehouse=PFE_COMMON_WH_XS_01&db=COMETL_SFDC_X_REGION_DEV_DB&schema=COMETL_SFDC_PUBLISH" \
                               --changeLogFile=unused.xml \
                                 execute-sql \
                               --sql="SELECT CURRENT_USER();" 
