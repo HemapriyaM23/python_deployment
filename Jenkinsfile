@@ -17,9 +17,7 @@ pipeline {
 
 
         stage ("Deploy to Snowflake Database - COMETL_CONTROL"){
-            when {
-                 expression { params.Deploy_to_Snowflake_COMETL_CONTROL == "Yes" }
-            }
+            
                 steps{
                     script{
                         println "Deploying into COMETL_CONTROL ${env.BRANCH_NAME} environment"
