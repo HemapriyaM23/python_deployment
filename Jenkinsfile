@@ -22,14 +22,22 @@ pipeline {
     stages{
 
 
-        stage ("Deploy to Snowflake Database - COMETL_CONTROL"){
+        stage ("Deploy to Snowflake Database"){
              when {
                  expression { params.Deploy_to_Snowflake_COMETL_CONTROL == "Yes" }
             }
                 steps{
                     script{
-                        println "Deploying into COMETL_CONTROL ${env.BRANCH_NAME} environment"
-                        snowflake_deploy(url: snowflake_COMETL_CONTROL__db_url, cred: snowflake_credid, changelog: snowflake_changeLogFile_COMETL_CONTROL__db, dry_run: dry_run) 
+                        
+                       def liquibaseCommand = """
+                        liquibase \
+                              --url="jdbc:snowflake://emeadev01.eu-west-1.privatelink.snowflakecomputing.com/?user=CMMFRCRO@pfizer.com&privateKeyFile=/home/srvamr-sfaops/test_private_key/test.p8&privateKeyFilePwd=${prv_key_pwd}&warehouse=PFE_COMMON_WH_XS_01&db=COMETL_SFDC_X_REGION_DEV_DB&schema=COMETL_SFDC_PUBLISH" \
+                              --changeLogFile=unused.xml \
+                                execute-sql \
+                              --sql="SELECT CURRENT_USER();" 
+                    """
+                    // Run the liquibase command
+                    sh liquibaseCommand
                         }
                 }
         }
