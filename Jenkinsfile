@@ -1,47 +1,43 @@
+@Library('sfdi-devops-tools-infra') _
+
 pipeline {
     agent any
-    environment{
- 	autosys_main_server= 'amraelp00011108'
-	jilDirectory='autosys/'
-	apiEndpoint='https://amraelp00011055.pfizer.com:9443/AEWS/jil'
-    }
-    parameters {
-    choice choices: ['No', 'Yes'], description: 'Mention if You want to Deploy into Autosys Environment', name: 'Deploy_to_Autosys'
-	choice choices: ['No', 'Yes'], description: 'Mention if You want to Deploy into Unix Environment', name: 'Deploy_to_Unix'
-       
-    }
-    stages{
+    environment {
         
-        stage ("Deploy to Autosys"){
+        snowflake_changeLogFile_COMETL_CONTROL__db = "Backend/data_alignment/snowflake/COMETL_CONTROL/changelog.sf.xml"
+        
+        snowflake_COMETL_CONTROL__db_url = "${getProperty("${env.BRANCH_NAME}_pfzalgn_snowflake_COMETL_CONTROL_db_url_apac_da")}"
+        
+        snowflake_credid = "${env.BRANCH_NAME}_pfzalgn_snowflake_credid_apac_da"
+        
+    }
+
+    
+    stages{
+
+
+        stage ("Deploy to Snowflake Database - COMETL_CONTROL"){
             when {
-                 expression { params.Deploy_to_Autosys == "Yes" }
-            }
-            steps{		
-		//prod server testing		
-		        sh 'chmod +x python_scripts/autosys_deploy.sh' 
-		        withCredentials([usernamePassword(credentialsId: 'sfaops', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')])
-                 {
-        		    script {
-            			env.PASSWORD = sh(script: "echo \$PASSWORD", returnStdout: true).trim()
-            			env.USERNAME = sh(script: "echo \$USERNAME", returnStdout: true).trim()
-        		    } 	
-			    sh 'python_scripts/autosys_deploy.sh'			
-		        }
-		}
-	}
-	 stage ("Deploy to Unix"){
-            when {
-                 expression { params.Deploy_to_Unix == "Yes" }
+                 expression { params.Deploy_to_Snowflake_COMETL_CONTROL == "Yes" }
             }
                 steps{
                     script{
-        sh "scp -i /var/lib/jenkins/.ssh/id_rsa test1.py srvamr-sfaops@amer@EUZ1PLDW08:/app/etl/repl/scripts"
-		sh "ssh -i /var/lib/jenkins/.ssh/id_rsa srvamr-sfaops@amer@EUZ1PLDW08 'sudo chmod 775 /app/etl/repl/scripts/*'"
-		
-		    }
+                        println "Deploying into COMETL_CONTROL ${env.BRANCH_NAME} environment"
+                        snowflake_deploy(url: snowflake_COMETL_CONTROL__db_url, cred: snowflake_credid, changelog: snowflake_changeLogFile_COMETL_CONTROL__db, dry_run: dry_run) 
+                        }
                 }
         }
-            
-				
+
+
+
+
+    }
+    post {
+        failure {
+            notification_email(Email_Alert: Email_Alert, Notify_to: Notify_to) 
+        }
+        success {
+            notification_email(Email_Alert: Email_Alert, Notify_to: Notify_to)
         }
     }
+}
