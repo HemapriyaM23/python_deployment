@@ -32,7 +32,7 @@ pipeline {
                         
                        def liquibaseCommand = """
                         liquibase \
-                              --url="jdbc:snowflake://emeadev01.eu-west-1.privatelink.snowflakecomputing.com/?user=CMMFRCRO@pfizer.com&private_Key_File=/home/srvamr-sfaops/test_private_key/test.p8&private_Key_Pwd=${private_key_password}&warehouse=PFE_COMMON_WH_XS_01&db=COMETL_SFDC_X_REGION_DEV_DB&schema=COMETL_SFDC_PUBLISH" \
+                              --url="jdbc:snowflake://emeadev01.eu-west-1.privatelink.snowflakecomputing.com/?user=CMMFRCRO@pfizer.com&warehouse=PFE_COMMON_WH_XS_01&db=COMETL_SFDC_X_REGION_DEV_DB&schema=COMETL_SFDC_PUBLISH" \
                               --changeLogFile=unused.xml \
                                 execute-sql \
                               --sql="SELECT CURRENT_USER();" 
