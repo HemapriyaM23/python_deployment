@@ -5,7 +5,7 @@ pipeline {
     environment {
         snowflake_changeLogFile  = "snowflake/changelog.sf.xml"
         
-        snowflake_url_new        = "${getProperty("${env.BRANCH_NAME}_snowflake_pvt_test")}"
+        snowflake_db_url        = "${getProperty("${env.BRANCH_NAME}_snowflake_pvt_test")}"
         snowflake_credid         = "${env.BRANCH_NAME}_snowflake_credid_pvt"
     }
 
