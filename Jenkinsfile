@@ -3,48 +3,52 @@
 pipeline {
     agent any
     environment {
+        snowflake_changeLogFile  = "snowflake/changelog.sf.xml"
         
-        snowflake_changeLogFile_COMETL_CONTROL__db = "Backend/data_alignment/snowflake/COMETL_CONTROL/changelog.sf.xml"
-        
-        snowflake_COMETL_CONTROL__db_url = "${getProperty("${env.BRANCH_NAME}_pfzalgn_snowflake_COMETL_CONTROL_db_url_apac_da")}"
-        
-        snowflake_credid = "${env.BRANCH_NAME}_pfzalgn_snowflake_credid_apac_da"
-        private_key_password = credentials('prv_key_pwd')
-        
+        snowflake_url_new        = "${getProperty("${env.BRANCH_NAME}_snowflake_pvt_test")}"
+        snowflake_credid         = "${env.BRANCH_NAME}_snowflake_credid_pvt"
     }
+
     parameters {
-        
-        choice choices: ['No', 'Yes'], description: 'Mention if You want to Deploy into Snowflake Environment', name: 'Deploy_to_Snowflake_COMETL_CONTROL'
-       
+        choice choices: ['No', 'Yes'], description: 'Mention if You want to Deploy into Snowflake Environment', name: 'Deploy_to_Snowflake'
         choice choices: ['Yes', 'No'], description: 'Mention if You want to Dry Run', name: 'dry_run'
-        
+        choice choices: ['No', 'Yes'], description: 'If you want to send alerts', name: 'Email_Alert'
+        string defaultValue: 'None', description: 'Provide the comma separated Email addresses.', name: 'Notify_to'
     }
-    
-    stages{
 
-
-        stage ("Deploy to Snowflake Database"){
-             when {
-                 expression { params.Deploy_to_Snowflake_COMETL_CONTROL == "Yes" }
+    stages {
+        stage("Approval for Prod") {
+            when {
+                expression { "${env.BRANCH_NAME}" == "main" }
             }
-                steps{
-                    script{
-                        
-                       def liquibaseCommand = """
-                        liquibase \
-                              --url="jdbc:snowflake://emeadev01.eu-west-1.privatelink.snowflakecomputing.com/?user=CMMFRCRO@pfizer.com&warehouse=PFE_COMMON_WH_XS_01&db=COMETL_SFDC_X_REGION_DEV_DB&schema=COMETL_SFDC_PUBLISH" \
-                              --changeLogFile=unused.xml \
-                                execute-sql \
-                              --sql="SELECT CURRENT_USER();" 
-                    """
-                    // Run the liquibase command
-                    sh liquibaseCommand
-                        }
+            steps {
+                script {
+                    email_approval()
                 }
+            }
         }
 
 
+        stage("Deploy to Snowflake Database") {
+            when {
+                expression { params.Deploy_to_Snowflake == "Yes" }
+            }
+            steps {
+                script {
+                    println "Deploying into Snowflake ${env.BRANCH_NAME} environment"
+                    snowflake_deploy(url: snowflake_db_url, cred: snowflake_credid, changelog: snowflake_changeLogFile, dry_run: dry_run)
+                }
+            }
+        }
 
+    }
 
+    post {
+        failure {
+            notification_email(Email_Alert: Email_Alert, Notify_to: Notify_to) 
+        }
+        success {
+            notification_email(Email_Alert: Email_Alert, Notify_to: Notify_to)
+        }
     }
 }
